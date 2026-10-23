@@ -3,6 +3,7 @@
     <Project Path="src/CurrencyToWords.Api/CurrencyToWords.Api.csproj" />
     <Project Path="src/CurrencyToWords.Contracts/CurrencyToWords.Contracts.csproj" />
     <Project Path="src/CurrencyToWords.Core/CurrencyToWords.Core.csproj" />
+    <Project Path="src/CurrencyToWords.Web/CurrencyToWords.Web.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/CurrencyToWords.Core.Tests/CurrencyToWords.Core.Tests.csproj" />
