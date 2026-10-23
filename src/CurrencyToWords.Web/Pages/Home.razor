@@ -1,4 +1,5 @@
 ﻿@page "/"
+@using System.Net
 @inject HttpClient Http
 
 <PageTitle>Currency to Words</PageTitle>
@@ -8,7 +9,9 @@
 <form @onsubmit="ConvertAsync">
     <div class="mb-3">
         <label for="amount" class="form-label">Amount in dollars</label>
-        <input id="amount" class="form-control" @bind="amount" placeholder="e.g. 45 100 or 25,1" />
+        <input id="amount" class="form-control @(amountError is null ? "" : "is-invalid")" @bind="amount"
+               placeholder="e.g. 45 100 or 25,1" aria-describedby="amount-error" />
+        <div id="amount-error" class="invalid-feedback">@amountError</div>
     </div>
 
     <div class="mb-3">
@@ -22,24 +25,51 @@
     <button type="submit" class="btn btn-primary" disabled="@isConverting">Convert</button>
 </form>
 
+@if (generalError is not null)
+{
+    <div class="alert alert-danger mt-4" role="alert">@generalError</div>
+}
+
 <p class="mt-4 fs-5" aria-live="polite">@words</p>
 
 @code {
+    private const string GeneralErrorMessage = "The conversion service is not available. Please try again later.";
+
     private string amount = "";
     private string language = "en";
     private string? words;
+    private string? amountError;
+    private string? generalError;
     private bool isConverting;
 
     private async Task ConvertAsync()
     {
         isConverting = true;
+        words = amountError = generalError = null;
         try
         {
             var response = await Http.PostAsJsonAsync("api/convert", new ConvertRequest(amount, language));
-            response.EnsureSuccessStatusCode();
 
-            var result = await response.Content.ReadFromJsonAsync<ConvertResponse>();
-            words = result?.Words;
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<ConvertResponse>();
+                words = result?.Words;
+            }
+            else if (response.StatusCode == HttpStatusCode.BadRequest)
+            {
+                // The API's message is meant for the user and is already in the selected language.
+                var problem = await response.Content.ReadFromJsonAsync<ProblemResponse>();
+                amountError = problem?.Detail ?? GeneralErrorMessage;
+            }
+            else
+            {
+                generalError = GeneralErrorMessage;
+            }
+        }
+        catch (HttpRequestException)
+        {
+            // The API is not running or not reachable.
+            generalError = GeneralErrorMessage;
         }
         finally
         {
@@ -47,10 +77,13 @@
         }
     }
 
-    // Switching the language re-converts, so the shown result always matches the selection.
+    // Switching the language re-converts, so the result or error always matches the selection.
     private async Task ConvertAgainAsync()
     {
-        if (words is not null)
+        if (words is not null || amountError is not null)
             await ConvertAsync();
     }
+
+    // The part of the API's ProblemDetails response that the page shows.
+    private sealed record ProblemResponse(string? Detail);
 }
