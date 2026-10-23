@@ -13,6 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="..\CurrencyToWords.Core\CurrencyToWords.Core.csproj" />
     <ProjectReference Include="..\CurrencyToWords.Contracts\CurrencyToWords.Contracts.csproj" />
+    <ProjectReference Include="..\CurrencyToWords.Web\CurrencyToWords.Web.csproj" />
   </ItemGroup>
 
 </Project>

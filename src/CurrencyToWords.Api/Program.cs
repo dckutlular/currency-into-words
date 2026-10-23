@@ -33,6 +33,10 @@ if (app.Environment.IsDevelopment())
 // No UseHttpsRedirection: browsers don't follow redirects on CORS preflight requests,
 // so a redirect would block the Blazor client. HTTPS is the hosting environment's job.
 
+// The API also serves the Blazor client, so a deployment is one service with one address.
+// The client still runs in the browser and calls /api/convert over HTTP.
+app.MapStaticAssets();
+
 app.MapPost("/api/convert", Results<Ok<ConvertResponse>, ProblemHttpResult> (
     ConvertRequest request, IEnumerable<ICurrencyToWordsConverter> converters) =>
 {
@@ -67,5 +71,10 @@ app.MapPost("/api/convert", Results<Ok<ConvertResponse>, ProblemHttpResult> (
 // A valid request is a few dozen bytes. Without a limit, Kestrel accepts 30 MB per request,
 // and a few parallel large requests can use up the memory of a small hosting instance.
 .WithMetadata(new RequestSizeLimitAttribute(4 * 1024));
+
+// Any other page URL is a client-side route, so it gets the Blazor app.
+// Unknown /api addresses get 404 instead, so API clients never receive the HTML page.
+app.MapFallback("/api/{**path}", () => Results.NotFound());
+app.MapFallbackToFile("index.html");
 
 app.Run();

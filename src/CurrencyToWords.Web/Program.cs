@@ -6,9 +6,12 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-// The API runs separately, so its address comes from wwwroot/appsettings.json.
-var apiBaseUrl = builder.Configuration["ApiBaseUrl"]
-    ?? throw new InvalidOperationException("ApiBaseUrl is missing in wwwroot/appsettings.json.");
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(apiBaseUrl) });
+// Deployed, the API serves this app, so it calls its own address (empty ApiBaseUrl).
+// In local development the API runs separately; appsettings.Development.json points to it.
+var apiBaseUrl = builder.Configuration["ApiBaseUrl"];
+builder.Services.AddScoped(sp => new HttpClient
+{
+    BaseAddress = new Uri(string.IsNullOrEmpty(apiBaseUrl) ? builder.HostEnvironment.BaseAddress : apiBaseUrl),
+});
 
 await builder.Build().RunAsync();
