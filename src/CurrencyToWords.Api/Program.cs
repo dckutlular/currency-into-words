@@ -1,4 +1,4 @@
-using CurrencyToWords.Api;
+using CurrencyToWords.Contracts;
 using CurrencyToWords.Core;
 using Microsoft.AspNetCore.Http.HttpResults;
 

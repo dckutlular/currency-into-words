@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/CurrencyToWords.Api/CurrencyToWords.Api.csproj" />
+    <Project Path="src/CurrencyToWords.Contracts/CurrencyToWords.Contracts.csproj" />
     <Project Path="src/CurrencyToWords.Core/CurrencyToWords.Core.csproj" />
   </Folder>
   <Folder Name="/tests/">
