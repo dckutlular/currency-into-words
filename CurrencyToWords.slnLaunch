@@ -1,0 +1,17 @@
+[
+  {
+    "Name": "API + Web",
+    "Projects": [
+      {
+        "Path": "src\\CurrencyToWords.Api\\CurrencyToWords.Api.csproj",
+        "Action": "Start",
+        "DebugTarget": "http"
+      },
+      {
+        "Path": "src\\CurrencyToWords.Web\\CurrencyToWords.Web.csproj",
+        "Action": "Start",
+        "DebugTarget": "http"
+      }
+    ]
+  }
+]
