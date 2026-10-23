@@ -1,0 +1,5 @@
+@CurrencyToWords.Api_HostAddress = http://localhost:5085
+
+### The API is running if this returns the OpenAPI document
+GET {{CurrencyToWords.Api_HostAddress}}/openapi/v1.json
+Accept: application/json
