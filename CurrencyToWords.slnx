@@ -6,6 +6,7 @@
     <Project Path="src/CurrencyToWords.Web/CurrencyToWords.Web.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/CurrencyToWords.Api.Tests/CurrencyToWords.Api.Tests.csproj" />
     <Project Path="tests/CurrencyToWords.Core.Tests/CurrencyToWords.Core.Tests.csproj" />
   </Folder>
 </Solution>
