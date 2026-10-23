@@ -1,5 +1,56 @@
 ﻿@page "/"
+@inject HttpClient Http
 
 <PageTitle>Currency to Words</PageTitle>
 
-<h1>Currency to Words</h1>
+<h1 class="mb-4">Currency to Words</h1>
+
+<form @onsubmit="ConvertAsync">
+    <div class="mb-3">
+        <label for="amount" class="form-label">Amount in dollars</label>
+        <input id="amount" class="form-control" @bind="amount" placeholder="e.g. 45 100 or 25,1" />
+    </div>
+
+    <div class="mb-3">
+        <label for="language" class="form-label">Language</label>
+        <select id="language" class="form-select" @bind="language" @bind:after="ConvertAgainAsync">
+            <option value="en">English</option>
+            <option value="de">Deutsch</option>
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary" disabled="@isConverting">Convert</button>
+</form>
+
+<p class="mt-4 fs-5" aria-live="polite">@words</p>
+
+@code {
+    private string amount = "";
+    private string language = "en";
+    private string? words;
+    private bool isConverting;
+
+    private async Task ConvertAsync()
+    {
+        isConverting = true;
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/convert", new ConvertRequest(amount, language));
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadFromJsonAsync<ConvertResponse>();
+            words = result?.Words;
+        }
+        finally
+        {
+            isConverting = false;
+        }
+    }
+
+    // Switching the language re-converts, so the shown result always matches the selection.
+    private async Task ConvertAgainAsync()
+    {
+        if (words is not null)
+            await ConvertAsync();
+    }
+}
