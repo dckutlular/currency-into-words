@@ -7,6 +7,7 @@ public class AmountParserTests
     [InlineData("45 100", 45_100, 0)]
     [InlineData("25,1", 25, 10)]
     [InlineData("0,01", 0, 1)]
+    [InlineData("0,33", 0, 33)]
     [InlineData("999 999 999,99", 999_999_999, 99)]
     public void Parses_valid_input(string input, int dollars, int cents)
     {
@@ -31,12 +32,20 @@ public class AmountParserTests
     }
 
     [Theory]
-    [InlineData("en", "Cents must be one or two digits after the comma, for example 25,1 or 25,10.")]
-    [InlineData("de", "Cent müssen ein oder zwei Ziffern nach dem Komma sein, zum Beispiel 25,1 oder 25,10.")]
-    [InlineData("fr", "Cents must be one or two digits after the comma, for example 25,1 or 25,10.")]
-    public void Error_message_uses_selected_language(string language, string expected)
+    [InlineData("25,", "en", "The cent part after ',' is missing.")]
+    [InlineData("25,", "de", "Der Cent-Teil nach dem ',' fehlt.")]
+    [InlineData("25,999", "en", "Cents can have at most two digits.")]
+    [InlineData("25,999", "de", "Cent dürfen höchstens zwei Ziffern haben.")]
+    [InlineData(",33", "en", "The dollar part before ',' is missing.")]
+    [InlineData(",33", "de", "Der Dollar-Teil vor dem ',' fehlt.")]
+    [InlineData("25,a", "en", "Only digits, spaces and a single ',' are allowed (e.g. 45 100,25).")]
+    [InlineData("25,a", "de", "Nur Ziffern, Leerzeichen und ein einzelnes ',' sind erlaubt (z. B. 45 100,25).")]
+    [InlineData("abc", "en", "Only digits, spaces and a single ',' are allowed (e.g. 45 100,25).")]
+    [InlineData("25.1", "de", "Nur Ziffern, Leerzeichen und ein einzelnes ',' sind erlaubt (z. B. 45 100,25).")]
+    [InlineData("25,999", "fr", "Cents can have at most two digits.")]
+    public void Error_message_explains_the_problem_in_selected_language(string input, string language, string expected)
     {
-        var exception = Assert.Throws<FormatException>(() => AmountParser.Parse("25,999", language));
+        var exception = Assert.Throws<FormatException>(() => AmountParser.Parse(input, language));
 
         Assert.Equal(expected, exception.Message);
     }

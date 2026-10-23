@@ -6,7 +6,9 @@
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="Empty" xml:space="preserve"><value>Bitte geben Sie einen Betrag ein.</value></data>
   <data name="TooManyCommas" xml:space="preserve"><value>Verwenden Sie nur ein Komma, um Dollar und Cent zu trennen.</value></data>
-  <data name="InvalidDollars" xml:space="preserve"><value>Dollar müssen eine ganze Zahl sein, zum Beispiel 45 100.</value></data>
+  <data name="InvalidCharacters" xml:space="preserve"><value>Nur Ziffern, Leerzeichen und ein einzelnes ',' sind erlaubt (z. B. 45 100,25).</value></data>
   <data name="TooLarge" xml:space="preserve"><value>Der Höchstbetrag ist 999 999 999 Dollar.</value></data>
-  <data name="InvalidCents" xml:space="preserve"><value>Cent müssen ein oder zwei Ziffern nach dem Komma sein, zum Beispiel 25,1 oder 25,10.</value></data>
+  <data name="DollarsMissing" xml:space="preserve"><value>Der Dollar-Teil vor dem ',' fehlt.</value></data>
+  <data name="CentsMissing" xml:space="preserve"><value>Der Cent-Teil nach dem ',' fehlt.</value></data>
+  <data name="TooManyCentDigits" xml:space="preserve"><value>Cent dürfen höchstens zwei Ziffern haben.</value></data>
 </root>

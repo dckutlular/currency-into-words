@@ -31,8 +31,12 @@ public static class AmountParser
 
     private static int ParseDollars(string text, string language)
     {
+        // Only possible when the input starts with a comma, e.g. ",33". "0,33" is valid.
+        if (text.Length == 0)
+            throw Invalid(nameof(ValidationMessages.DollarsMissing), language);
+
         if (!IsDigitsOnly(text))
-            throw Invalid(nameof(ValidationMessages.InvalidDollars), language);
+            throw Invalid(nameof(ValidationMessages.InvalidCharacters), language);
 
         // Digits only, so TryParse can only fail on overflow.
         if (!int.TryParse(text, NumberStyles.None, CultureInfo.InvariantCulture, out var dollars)
@@ -44,8 +48,14 @@ public static class AmountParser
 
     private static int ParseCents(string text, string language)
     {
-        if (text.Length > 2 || !IsDigitsOnly(text))
-            throw Invalid(nameof(ValidationMessages.InvalidCents), language);
+        if (text.Length == 0)
+            throw Invalid(nameof(ValidationMessages.CentsMissing), language);
+
+        if (!IsDigitsOnly(text))
+            throw Invalid(nameof(ValidationMessages.InvalidCharacters), language);
+
+        if (text.Length > 2)
+            throw Invalid(nameof(ValidationMessages.TooManyCentDigits), language);
 
         // "25,1" means ten cents, like 25.1 written with a decimal point.
         var cents = int.Parse(text, CultureInfo.InvariantCulture);

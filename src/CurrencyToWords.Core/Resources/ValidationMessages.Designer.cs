@@ -61,6 +61,24 @@ namespace CurrencyToWords.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The cent part after &apos;,&apos; is missing..
+        /// </summary>
+        internal static string CentsMissing {
+            get {
+                return ResourceManager.GetString("CentsMissing", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to The dollar part before &apos;,&apos; is missing..
+        /// </summary>
+        internal static string DollarsMissing {
+            get {
+                return ResourceManager.GetString("DollarsMissing", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Please enter an amount..
         /// </summary>
         internal static string Empty {
@@ -70,20 +88,11 @@ namespace CurrencyToWords.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cents must be one or two digits after the comma, for example 25,1 or 25,10..
+        ///   Looks up a localized string similar to Only digits, spaces and a single &apos;,&apos; are allowed (e.g. 45 100,25)..
         /// </summary>
-        internal static string InvalidCents {
+        internal static string InvalidCharacters {
             get {
-                return ResourceManager.GetString("InvalidCents", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Dollars must be a whole number, for example 45 100..
-        /// </summary>
-        internal static string InvalidDollars {
-            get {
-                return ResourceManager.GetString("InvalidDollars", resourceCulture);
+                return ResourceManager.GetString("InvalidCharacters", resourceCulture);
             }
         }
         
@@ -96,6 +105,15 @@ namespace CurrencyToWords.Core.Resources {
             }
         }
         
+        /// <summary>
+        ///   Looks up a localized string similar to Cents can have at most two digits..
+        /// </summary>
+        internal static string TooManyCentDigits {
+            get {
+                return ResourceManager.GetString("TooManyCentDigits", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Use only one comma to separate dollars and cents..
         /// </summary>
