@@ -5,6 +5,8 @@ public class AmountParserTests
     [Theory]
     [InlineData("0", 0, 0)]
     [InlineData("45 100", 45_100, 0)]
+    [InlineData("45 100", 45_100, 0)] // non-breaking space, e.g. copied from Word or Excel
+    [InlineData("45\t100", 45_100, 0)]
     [InlineData("25,1", 25, 10)]
     [InlineData("0,01", 0, 1)]
     [InlineData("0,33", 0, 33)]

@@ -5,7 +5,7 @@ namespace CurrencyToWords.Core;
 
 /// <summary>
 /// Parses user input like "45 100" or "25,1" into a <see cref="CurrencyAmount"/>.
-/// Spaces are thousands separators and a comma separates dollars from cents.
+/// Spaces (any whitespace) are thousands separators and a comma separates dollars from cents.
 /// </summary>
 public static class AmountParser
 {
@@ -13,7 +13,8 @@ public static class AmountParser
     /// <exception cref="FormatException">The input is not a valid amount. The message can be shown to the user.</exception>
     public static CurrencyAmount Parse(string input, string language)
     {
-        var compact = (input ?? "").Replace(" ", "");
+        // Any whitespace counts as a thousands separator, including non-breaking spaces from copied text.
+        var compact = string.Concat((input ?? "").Where(c => !char.IsWhiteSpace(c)));
 
         if (compact.Length == 0)
             throw Invalid(nameof(ValidationMessages.Empty), language);
