@@ -29,7 +29,8 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
+// No UseHttpsRedirection: browsers don't follow redirects on CORS preflight requests,
+// so a redirect would block the Blazor client. HTTPS is the hosting environment's job.
 
 app.MapPost("/api/convert", Results<Ok<ConvertResponse>, ProblemHttpResult> (
     ConvertRequest request, IEnumerable<ICurrencyToWordsConverter> converters) =>
