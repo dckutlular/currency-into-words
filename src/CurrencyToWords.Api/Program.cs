@@ -1,6 +1,7 @@
 using CurrencyToWords.Contracts;
 using CurrencyToWords.Core;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -62,6 +63,9 @@ app.MapPost("/api/convert", Results<Ok<ConvertResponse>, ProblemHttpResult> (
 
     return TypedResults.Ok(new ConvertResponse(converter.Convert(amount)));
 })
-.WithName("Convert");
+.WithName("Convert")
+// A valid request is a few dozen bytes. Without a limit, Kestrel accepts 30 MB per request,
+// and a few parallel large requests can use up the memory of a small hosting instance.
+.WithMetadata(new RequestSizeLimitAttribute(4 * 1024));
 
 app.Run();

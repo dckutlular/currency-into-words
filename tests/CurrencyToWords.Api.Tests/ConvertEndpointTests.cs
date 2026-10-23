@@ -44,4 +44,20 @@ public class ConvertEndpointTests(WebApplicationFactory<Program> factory) : ICla
         Assert.Equal("Unsupported language", problem?.Title);
         Assert.Equal("Language 'fr' is not supported. Use one of: en, de.", problem?.Detail);
     }
+
+    [Fact]
+    public async Task Rejects_oversized_request_before_reading_it()
+    {
+        // The in-memory test server ignores body size limits, so this test runs the API on real Kestrel.
+        using var kestrel = new WebApplicationFactory<Program>();
+        kestrel.UseKestrel(0);
+        kestrel.StartServer();
+
+        // A real amount is a few dozen bytes; big bodies would only cost server memory.
+        var oversized = new ConvertRequest(new string(' ', 5_000), "en");
+
+        var response = await kestrel.CreateClient().PostAsJsonAsync("/api/convert", oversized);
+
+        Assert.Equal(HttpStatusCode.RequestEntityTooLarge, response.StatusCode);
+    }
 }
