@@ -45,10 +45,19 @@ public class AmountParserTests
     [InlineData("abc", "en", "Only digits, spaces and a single ',' are allowed (e.g. 45 100,25).")]
     [InlineData("25.1", "de", "Nur Ziffern, Leerzeichen und ein einzelnes ',' sind erlaubt (z. B. 45 100,25).")]
     [InlineData("25,999", "fr", "Cents can have at most two digits.")]
+    [InlineData("25,999", "x!y", "Cents can have at most two digits.")]
     public void Error_message_explains_the_problem_in_selected_language(string input, string language, string expected)
     {
         var exception = Assert.Throws<FormatException>(() => AmountParser.Parse(input, language));
 
         Assert.Equal(expected, exception.Message);
+    }
+
+    [Fact]
+    public void Missing_language_falls_back_to_English()
+    {
+        var exception = Assert.Throws<FormatException>(() => AmountParser.Parse("25,999", null!));
+
+        Assert.Equal("Cents can have at most two digits.", exception.Message);
     }
 }

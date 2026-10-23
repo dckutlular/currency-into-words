@@ -65,7 +65,19 @@ public static class AmountParser
 
     private static bool IsDigitsOnly(string text) => text.Length > 0 && text.All(char.IsAsciiDigit);
 
-    // Unknown languages fall back to the English messages in ValidationMessages.resx.
     private static FormatException Invalid(string messageKey, string language) =>
-        new(ValidationMessages.ResourceManager.GetString(messageKey, CultureInfo.GetCultureInfo(language)));
+        new(ValidationMessages.ResourceManager.GetString(messageKey, ToCulture(language)));
+
+    // Unknown, invalid or missing languages fall back to the English messages in ValidationMessages.resx.
+    private static CultureInfo ToCulture(string? language)
+    {
+        try
+        {
+            return CultureInfo.GetCultureInfo(language ?? "");
+        }
+        catch (CultureNotFoundException)
+        {
+            return CultureInfo.InvariantCulture;
+        }
+    }
 }
