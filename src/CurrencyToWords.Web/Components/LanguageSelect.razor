@@ -1,0 +1,98 @@
+@* A drop-down with a flag next to each language. A native <select> can't show images in its list. *@
+
+<div class="language-select">
+    <button type="button" id="@Id" class="form-select" role="combobox"
+            aria-haspopup="listbox" aria-expanded="@(isOpen ? "true" : "false")" aria-controls="@ListId"
+            aria-activedescendant="@(isOpen ? OptionId(Languages[highlighted].Code) : null)"
+            @onclick="ToggleAsync" @onkeydown="OnKeyDown" @onfocusout="Close">
+        <img class="flag" src="img/flag-@(Value).svg" alt="" />
+        @Languages[SelectedIndex].Name
+    </button>
+
+    @if (isOpen)
+    {
+        <ul id="@ListId" class="language-options" role="listbox">
+            @for (var i = 0; i < Languages.Length; i++)
+            {
+                var index = i;
+                var language = Languages[i];
+                <li id="@OptionId(language.Code)" role="option" aria-selected="@(language.Code == Value ? "true" : "false")"
+                    class="@(index == highlighted ? "active" : null)"
+                    @onmousedown:preventDefault
+                    @onmouseenter="() => highlighted = index"
+                    @onclick="() => SelectAsync(language.Code)">
+                    <img class="flag" src="img/flag-@(language.Code).svg" alt="" />
+                    @language.Name
+                </li>
+            }
+        </ul>
+    }
+</div>
+
+@code {
+    // Each language is named in its own language, so these stay untranslated.
+    private static readonly (string Code, string Name)[] Languages = [("en", "English"), ("de", "Deutsch")];
+
+    /// <summary>Id of the button, so a &lt;label for="..."&gt; can point to it.</summary>
+    [Parameter, EditorRequired] public string Id { get; set; } = "";
+
+    [Parameter] public string Value { get; set; } = "en";
+
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+
+    private bool isOpen;
+    private int highlighted;
+
+    private string ListId => $"{Id}-options";
+    private int SelectedIndex => Array.FindIndex(Languages, l => l.Code == Value);
+    private string OptionId(string code) => $"{Id}-{code}";
+
+    // Enter and Space also arrive here, because they "click" a focused button.
+    private async Task ToggleAsync()
+    {
+        if (isOpen)
+            await SelectAsync(Languages[highlighted].Code);
+        else
+            Open();
+    }
+
+    private void Open()
+    {
+        highlighted = SelectedIndex;
+        isOpen = true;
+    }
+
+    // Focus leaving the button (Tab or a click elsewhere) closes the list.
+    // Options keep the focus on the button (mousedown:preventDefault), so clicking one doesn't close it early.
+    private void Close() => isOpen = false;
+
+    private async Task SelectAsync(string code)
+    {
+        isOpen = false;
+        if (code != Value)
+        {
+            Value = code;
+            await ValueChanged.InvokeAsync(code);
+        }
+    }
+
+    private void OnKeyDown(KeyboardEventArgs e)
+    {
+        switch (e.Key)
+        {
+            case "ArrowDown" when !isOpen:
+            case "ArrowUp" when !isOpen:
+                Open();
+                break;
+            case "ArrowDown":
+                highlighted = Math.Min(highlighted + 1, Languages.Length - 1);
+                break;
+            case "ArrowUp":
+                highlighted = Math.Max(highlighted - 1, 0);
+                break;
+            case "Escape":
+                Close();
+                break;
+        }
+    }
+}

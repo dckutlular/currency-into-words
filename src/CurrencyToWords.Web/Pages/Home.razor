@@ -1,30 +1,36 @@
 ﻿@page "/"
 @using System.Net
+@using Microsoft.JSInterop
 @inject HttpClient Http
+@inject IJSRuntime JS
 
 <PageTitle>@T.Title</PageTitle>
 
-<div lang="@language">
-    <h1 class="mb-4">@T.Title</h1>
+<div class="converter" lang="@language">
+    <h1 class="h3 mb-4">@T.Title</h1>
 
     <form @onsubmit="ConvertAsync">
-        <div class="mb-3">
-            <label for="amount" class="form-label">@T.AmountLabel</label>
-            <input id="amount" class="form-control @(amountError is null ? "" : "is-invalid")" @bind="amount"
-                   placeholder="@T.AmountPlaceholder" aria-describedby="amount-error" />
-            <div id="amount-error" class="invalid-feedback">@amountError</div>
+        <div class="row g-3 mb-3">
+            <div class="col-sm-6">
+                <label for="amount" class="form-label">@T.AmountLabel</label>
+                <input id="amount" class="form-control @(amountError is null ? "" : "is-invalid")" @bind="amount"
+                       placeholder="@T.AmountPlaceholder" aria-describedby="amount-error" />
+                <div id="amount-error" class="invalid-feedback">@amountError</div>
+            </div>
+
+            <div class="col-sm-6">
+                <label for="language" class="form-label">@T.LanguageLabel</label>
+                <LanguageSelect Id="language" @bind-Value="language" @bind-Value:after="ConvertAgainAsync" />
+            </div>
         </div>
 
-        <div class="mb-3">
-            <label for="language" class="form-label">@T.LanguageLabel</label>
-            @* Each language is named in its own language, so these stay untranslated. *@
-            <select id="language" class="form-select" @bind="language" @bind:after="ConvertAgainAsync">
-                <option value="en">English</option>
-                <option value="de">Deutsch</option>
-            </select>
-        </div>
-
-        <button type="submit" class="btn btn-primary" disabled="@isConverting">@T.ConvertButton</button>
+        <button type="submit" class="btn btn-convert w-100" disabled="@isConverting">
+            <svg class="me-2" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M17 3l4 4-4 4" /><path d="M3 7h18" /><path d="M7 21l-4-4 4-4" /><path d="M21 17H3" />
+            </svg>
+            @T.ConvertButton
+        </button>
     </form>
 
     @if (showGeneralError)
@@ -32,7 +38,39 @@
         <div class="alert alert-danger mt-4" role="alert">@T.GeneralError</div>
     }
 
-    <p class="mt-4 fs-5" aria-live="polite">@words</p>
+    <div aria-live="polite">
+        @if (words is not null)
+        {
+            <div class="result mt-4">
+                <div class="result-icon" aria-hidden="true">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4z" />
+                    </svg>
+                </div>
+                <div class="flex-grow-1">
+                    <div class="result-label">@T.ResultLabel</div>
+                    <div class="result-text">@words</div>
+                </div>
+                <button type="button" class="btn btn-copy" @onclick="CopyAsync"
+                        title="@(copied ? T.CopiedLabel : T.CopyLabel)" aria-label="@(copied ? T.CopiedLabel : T.CopyLabel)">
+                    @if (copied)
+                    {
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M20 6L9 17l-5-5" />
+                        </svg>
+                    }
+                    else
+                    {
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect x="9" y="9" width="12" height="12" rx="2" /><path d="M5 15V5a2 2 0 0 1 2-2h10" />
+                        </svg>
+                    }
+                </button>
+            </div>
+        }
+    </div>
 </div>
 
 @code {
@@ -42,6 +80,9 @@
         AmountPlaceholder: "e.g. 45 100 or 25,1",
         LanguageLabel: "Language",
         ConvertButton: "Convert",
+        ResultLabel: "Result",
+        CopyLabel: "Copy",
+        CopiedLabel: "Copied",
         GeneralError: "The conversion service is not available. Please try again later.");
 
     private static readonly PageText German = new(
@@ -50,6 +91,9 @@
         AmountPlaceholder: "z. B. 45 100 oder 25,1",
         LanguageLabel: "Sprache",
         ConvertButton: "Umwandeln",
+        ResultLabel: "Ergebnis",
+        CopyLabel: "Kopieren",
+        CopiedLabel: "Kopiert",
         GeneralError: "Der Dienst ist derzeit nicht verfügbar. Bitte versuchen Sie es später erneut.");
 
     private string amount = "";
@@ -58,6 +102,7 @@
     private string? amountError;
     private bool showGeneralError;
     private bool isConverting;
+    private bool copied;
 
     private PageText T => language == "de" ? German : English;
 
@@ -65,7 +110,7 @@
     {
         isConverting = true;
         words = amountError = null;
-        showGeneralError = false;
+        showGeneralError = copied = false;
         try
         {
             var response = await Http.PostAsJsonAsync("api/convert", new ConvertRequest(amount, language));
@@ -104,9 +149,28 @@
             await ConvertAsync();
     }
 
+    // Shows a check mark for two seconds after copying.
+    private async Task CopyAsync()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", words);
+        }
+        catch (JSException)
+        {
+            // The browser refused clipboard access; there is nothing useful to show.
+            return;
+        }
+
+        copied = true;
+        StateHasChanged();
+        await Task.Delay(2000);
+        copied = false;
+    }
+
     private sealed record PageText(
-        string Title, string AmountLabel, string AmountPlaceholder,
-        string LanguageLabel, string ConvertButton, string GeneralError);
+        string Title, string AmountLabel, string AmountPlaceholder, string LanguageLabel,
+        string ConvertButton, string ResultLabel, string CopyLabel, string CopiedLabel, string GeneralError);
 
     // The part of the API's ProblemDetails response that the page shows.
     private sealed record ProblemResponse(string? Detail);
