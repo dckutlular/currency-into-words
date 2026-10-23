@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/CurrencyToWords.Core/CurrencyToWords.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/CurrencyToWords.Core.Tests/CurrencyToWords.Core.Tests.csproj" />
+  </Folder>
+</Solution>
