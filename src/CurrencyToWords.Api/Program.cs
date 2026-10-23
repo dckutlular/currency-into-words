@@ -11,10 +11,18 @@ builder.Services.AddProblemDetails();
 builder.Services.AddSingleton<ICurrencyToWordsConverter, EnglishCurrencyToWordsConverter>();
 builder.Services.AddSingleton<ICurrencyToWordsConverter, GermanCurrencyToWordsConverter>();
 
+// The Blazor client runs on a different origin, so the browser needs CORS permission to call the API.
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
+builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy
+    .WithOrigins(allowedOrigins)
+    .WithMethods("POST")
+    .WithHeaders("Content-Type")));
+
 var app = builder.Build();
 
 // Unhandled exceptions become a generic 500 ProblemDetails; details are only logged.
 app.UseExceptionHandler();
+app.UseCors();
 
 if (app.Environment.IsDevelopment())
 {
