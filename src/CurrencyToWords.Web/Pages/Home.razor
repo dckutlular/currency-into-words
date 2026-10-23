@@ -2,50 +2,70 @@
 @using System.Net
 @inject HttpClient Http
 
-<PageTitle>Currency to Words</PageTitle>
+<PageTitle>@T.Title</PageTitle>
 
-<h1 class="mb-4">Currency to Words</h1>
+<div lang="@language">
+    <h1 class="mb-4">@T.Title</h1>
 
-<form @onsubmit="ConvertAsync">
-    <div class="mb-3">
-        <label for="amount" class="form-label">Amount in dollars</label>
-        <input id="amount" class="form-control @(amountError is null ? "" : "is-invalid")" @bind="amount"
-               placeholder="e.g. 45 100 or 25,1" aria-describedby="amount-error" />
-        <div id="amount-error" class="invalid-feedback">@amountError</div>
-    </div>
+    <form @onsubmit="ConvertAsync">
+        <div class="mb-3">
+            <label for="amount" class="form-label">@T.AmountLabel</label>
+            <input id="amount" class="form-control @(amountError is null ? "" : "is-invalid")" @bind="amount"
+                   placeholder="@T.AmountPlaceholder" aria-describedby="amount-error" />
+            <div id="amount-error" class="invalid-feedback">@amountError</div>
+        </div>
 
-    <div class="mb-3">
-        <label for="language" class="form-label">Language</label>
-        <select id="language" class="form-select" @bind="language" @bind:after="ConvertAgainAsync">
-            <option value="en">English</option>
-            <option value="de">Deutsch</option>
-        </select>
-    </div>
+        <div class="mb-3">
+            <label for="language" class="form-label">@T.LanguageLabel</label>
+            @* Each language is named in its own language, so these stay untranslated. *@
+            <select id="language" class="form-select" @bind="language" @bind:after="ConvertAgainAsync">
+                <option value="en">English</option>
+                <option value="de">Deutsch</option>
+            </select>
+        </div>
 
-    <button type="submit" class="btn btn-primary" disabled="@isConverting">Convert</button>
-</form>
+        <button type="submit" class="btn btn-primary" disabled="@isConverting">@T.ConvertButton</button>
+    </form>
 
-@if (generalError is not null)
-{
-    <div class="alert alert-danger mt-4" role="alert">@generalError</div>
-}
+    @if (showGeneralError)
+    {
+        <div class="alert alert-danger mt-4" role="alert">@T.GeneralError</div>
+    }
 
-<p class="mt-4 fs-5" aria-live="polite">@words</p>
+    <p class="mt-4 fs-5" aria-live="polite">@words</p>
+</div>
 
 @code {
-    private const string GeneralErrorMessage = "The conversion service is not available. Please try again later.";
+    private static readonly PageText English = new(
+        Title: "Currency to Words",
+        AmountLabel: "Amount in dollars",
+        AmountPlaceholder: "e.g. 45 100 or 25,1",
+        LanguageLabel: "Language",
+        ConvertButton: "Convert",
+        GeneralError: "The conversion service is not available. Please try again later.");
+
+    private static readonly PageText German = new(
+        Title: "Betrag in Worten",
+        AmountLabel: "Betrag in Dollar",
+        AmountPlaceholder: "z. B. 45 100 oder 25,1",
+        LanguageLabel: "Sprache",
+        ConvertButton: "Umwandeln",
+        GeneralError: "Der Dienst ist derzeit nicht verfügbar. Bitte versuchen Sie es später erneut.");
 
     private string amount = "";
     private string language = "en";
     private string? words;
     private string? amountError;
-    private string? generalError;
+    private bool showGeneralError;
     private bool isConverting;
+
+    private PageText T => language == "de" ? German : English;
 
     private async Task ConvertAsync()
     {
         isConverting = true;
-        words = amountError = generalError = null;
+        words = amountError = null;
+        showGeneralError = false;
         try
         {
             var response = await Http.PostAsJsonAsync("api/convert", new ConvertRequest(amount, language));
@@ -59,17 +79,17 @@
             {
                 // The API's message is meant for the user and is already in the selected language.
                 var problem = await response.Content.ReadFromJsonAsync<ProblemResponse>();
-                amountError = problem?.Detail ?? GeneralErrorMessage;
+                amountError = problem?.Detail ?? T.GeneralError;
             }
             else
             {
-                generalError = GeneralErrorMessage;
+                showGeneralError = true;
             }
         }
         catch (HttpRequestException)
         {
             // The API is not running or not reachable.
-            generalError = GeneralErrorMessage;
+            showGeneralError = true;
         }
         finally
         {
@@ -83,6 +103,10 @@
         if (words is not null || amountError is not null)
             await ConvertAsync();
     }
+
+    private sealed record PageText(
+        string Title, string AmountLabel, string AmountPlaceholder,
+        string LanguageLabel, string ConvertButton, string GeneralError);
 
     // The part of the API's ProblemDetails response that the page shows.
     private sealed record ProblemResponse(string? Detail);
