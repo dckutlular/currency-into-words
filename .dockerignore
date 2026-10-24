@@ -1,0 +1,9 @@
+# Keep the build context small and free of local build output.
+# Without this, bin/ and obj/ from Windows builds would be copied into the image and confuse the build.
+**/bin/
+**/obj/
+**/*.user
+.git/
+.vs/
+.claude/
+tests/
