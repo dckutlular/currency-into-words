@@ -127,6 +127,9 @@ body {
 .result-text {
     font-weight: 700;
     font-size: 1.2rem;
+    /* German compounds are single long words; hyphenate them, and break anywhere as a last resort. */
+    hyphens: auto;
+    overflow-wrap: anywhere;
 }
 
 .btn-copy {
