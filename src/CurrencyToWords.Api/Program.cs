@@ -23,6 +23,22 @@ var app = builder.Build();
 
 // Unhandled exceptions become a generic 500 ProblemDetails; details are only logged.
 app.UseExceptionHandler();
+
+// Security headers on every response, including the Blazor client's files.
+// 'wasm-unsafe-eval' lets the browser compile Blazor's WebAssembly; data: is for Bootstrap's select arrow.
+app.Use(async (context, next) =>
+{
+    var headers = context.Response.Headers;
+    headers.ContentSecurityPolicy =
+        "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; img-src 'self' data:; " +
+        "object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'";
+    headers.XContentTypeOptions = "nosniff";
+    headers["Referrer-Policy"] = "no-referrer";
+    // The host only serves this site over HTTPS; browsers ignore the header on plain HTTP.
+    headers.StrictTransportSecurity = "max-age=31536000";
+    await next();
+});
+
 app.UseCors();
 
 if (app.Environment.IsDevelopment())

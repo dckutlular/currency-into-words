@@ -5,6 +5,11 @@ body {
     color: #1a2035;
 }
 
+/* Page width (Layout/MainLayout.razor). Kept here, not inline: the CSP blocks inline styles. */
+.page {
+    max-width: 720px;
+}
+
 /* Converter page (Pages/Home.razor) */
 .converter .form-label {
     color: #4a5568;
