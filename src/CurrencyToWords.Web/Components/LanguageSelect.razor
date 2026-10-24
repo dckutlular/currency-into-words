@@ -9,24 +9,21 @@
         @Languages[SelectedIndex].Name
     </button>
 
-    @if (isOpen)
-    {
-        <ul id="@ListId" class="language-options" role="listbox">
-            @for (var i = 0; i < Languages.Length; i++)
-            {
-                var index = i;
-                var language = Languages[i];
-                <li id="@OptionId(language.Code)" role="option" aria-selected="@(language.Code == Value ? "true" : "false")"
-                    class="@(index == highlighted ? "active" : null)"
-                    @onmousedown:preventDefault
-                    @onmouseenter="() => highlighted = index"
-                    @onclick="() => SelectAsync(language.Code)">
-                    <img class="flag" src="img/flag-@(language.Code).svg" alt="" />
-                    @language.Name
-                </li>
-            }
-        </ul>
-    }
+    <ul id="@ListId" class="language-options" role="listbox" hidden="@(!isOpen)">
+        @for (var i = 0; i < Languages.Length; i++)
+        {
+            var index = i;
+            var language = Languages[i];
+            <li id="@OptionId(language.Code)" role="option" aria-selected="@(language.Code == Value ? "true" : "false")"
+                class="@(index == highlighted ? "active" : null)"
+                @onmousedown:preventDefault
+                @onmouseenter="() => highlighted = index"
+                @onclick="() => SelectAsync(language.Code)">
+                <img class="flag" src="img/flag-@(language.Code).svg" alt="" />
+                @language.Name
+            </li>
+        }
+    </ul>
 </div>
 
 @code {
