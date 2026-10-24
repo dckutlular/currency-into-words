@@ -7,7 +7,8 @@
 <PageTitle>@T.Title</PageTitle>
 
 <div class="converter" lang="@language">
-    <h1 class="h3 mb-4">@T.Title</h1>
+    <h1 class="h3 mb-1">@T.Title</h1>
+    <p class="subtitle mb-4">@T.Subtitle</p>
 
     <form @onsubmit="ConvertAsync">
         <div class="row g-3 mb-3">
@@ -76,10 +77,11 @@
 @code {
     private static readonly PageText English = new(
         Title: "Currency to Words",
+        Subtitle: "Converts a dollar amount into words. Use a comma for cents, e.g. 45 100,25.",
         AmountLabel: "Amount in dollars",
         AmountPlaceholder: "e.g. 45 100 or 25,1",
         LanguageLabel: "Language",
-        ConvertButton: "Convert",
+        ConvertButton: "Convert to Words",
         ResultLabel: "Result",
         CopyLabel: "Copy",
         CopiedLabel: "Copied",
@@ -87,10 +89,11 @@
 
     private static readonly PageText German = new(
         Title: "Betrag in Worten",
+        Subtitle: "Wandelt einen Dollarbetrag in Worte um. Cents mit Komma angeben, z. B. 45 100,25.",
         AmountLabel: "Betrag in Dollar",
         AmountPlaceholder: "z. B. 45 100 oder 25,1",
         LanguageLabel: "Sprache",
-        ConvertButton: "Umwandeln",
+        ConvertButton: "In Worte umwandeln",
         ResultLabel: "Ergebnis",
         CopyLabel: "Kopieren",
         CopiedLabel: "Kopiert",
@@ -169,7 +172,7 @@
     }
 
     private sealed record PageText(
-        string Title, string AmountLabel, string AmountPlaceholder, string LanguageLabel,
+        string Title, string Subtitle, string AmountLabel, string AmountPlaceholder, string LanguageLabel,
         string ConvertButton, string ResultLabel, string CopyLabel, string CopiedLabel, string GeneralError);
 
     // The part of the API's ProblemDetails response that the page shows.
