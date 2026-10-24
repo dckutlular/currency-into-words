@@ -136,3 +136,7 @@ The `hosting` branch adds what the live site needs on top of `master`: the API s
 3. Register the converter in `Api/Program.cs`
 4. Add the language to the list in `Web/Components/LanguageSelect.razor`, plus a flag at `wwwroot/img/flag-<code>.svg`
 5. Add the page texts in `Web/Pages/Home.razor`, which currently chooses between English and German with a simple check
+
+## Prompt history
+
+AI assistance was used to build this project. The prompts I used are in [PROMPT_HISTORY.md](PROMPT_HISTORY.md) in the root folder.
